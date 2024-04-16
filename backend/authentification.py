@@ -32,6 +32,16 @@ class Authentication:
         else:
             return False
     
+    @staticmethod
+    def fetchUserData():
+        conn = sqlite3.connect("db.sqlite")
+        cur = conn.cursor()
+        cur.execute("SELECT * from User")
+        user = cur.fetchone()
+        conn.close()
+        if user:
+            return user
+    
     def login_user(password):
         try:
             conn = sqlite3.connect("db.sqlite")
