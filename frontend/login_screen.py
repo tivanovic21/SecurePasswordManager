@@ -30,14 +30,11 @@ class LoginScreen(tk.Frame):
         email = self.entry_email.get()
         password = self.entry_password.get()
 
-        if not email or not password:
-            messagebox.showerror("Error", "Email and password are required")
-            return
-        else:
-            result = Authentication.login_user(email, password)
+        authentication_result, user_data = Authentication.login_user(email, password)
 
-            if result: 
-                messagebox.showinfo("Login", f"Logged in as {email}")
-                self.parent.show_password_managment_screen()
-            else:
-                messagebox.showerror("Error", "User not found!")
+        if authentication_result:
+            self.parent.set_user_data(user_data)
+            messagebox.showinfo("Login", "Logged in successfully!")
+            self.parent.show_password_management_screen()
+        else:
+            messagebox.showerror("Login Failed", "Invalid email or password")
