@@ -24,11 +24,11 @@ class LoginScreen(tk.Frame):
     def login(self):
         password = self.entry_password.get()
 
-        authentication_result, user_data = Authentication.login_user(password)
+        authentication_result, message = Authentication.login_user(password)
 
         if authentication_result:
-            self.parent.set_user_data(user_data)
-            messagebox.showinfo("Login", "Logged in successfully!")
+            self.parent.set_user_data(message)
+            messagebox.showinfo("Login", f"Welcome back {message[0]}")
             self.parent.show_password_management_screen()
         else:
-            messagebox.showerror("Login Failed", "Invalid email or password")
+            messagebox.showerror("Login Failed", message)

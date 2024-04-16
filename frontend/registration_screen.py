@@ -42,10 +42,9 @@ class RegistrationScreen(tk.Frame):
             messagebox.showerror("Error", "All fields are required")
             return
         else:
-            result = Authentication.register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False)
-
+            result, message = Authentication.register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False)
             if result: 
-                messagebox.showinfo("Login", f"Registered as {username}")
+                messagebox.showinfo("Login", message)
                 self.parent.show_login_screen()
-            else:
-                messagebox.showerror("Error", "Failed to register the user!")
+            elif not result:
+                messagebox.showerror("Error", message)

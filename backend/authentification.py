@@ -27,10 +27,10 @@ class Authentication:
         cur.execute("SELECT * FROM User")
         user = cur.fetchall()
         conn.close()
-        if len(user) != 0:
-            return False
-        else:
+        if len(user) == 0:
             return True
+        else:
+            return False
     
     def login_user(password):
         try:
@@ -46,9 +46,9 @@ class Authentication:
                     user = Authentication.fetchUser(data[1])
                     return True, user
                 else:
-                    return False, 'Invalid email or password.'
+                    return False, 'Invalid password.'
             else:
-                return False, 'Invalid email or password.'
+                return False, 'Invalid password.'
 
         except sqlite3.Error as e:
             print("Error accessing database:", e)
@@ -68,14 +68,14 @@ class Authentication:
 
                 cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint))
                 conn.commit()
-                return True
+                return True, f'Registered successfully as {username}'
 
             except sqlite3.Error as e:
                 print("Error accessing database:", e)
-                return False
+                return False, 'Error accessing database.'
 
             finally:
                 if conn:
                     conn.close()
         else:
-            return False
+            return False, 'Only one user can be registered.'
