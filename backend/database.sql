@@ -9,10 +9,10 @@ CREATE TABLE "User"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     "email" VARCHAR(45) NOT NULL,
     "master_password" VARCHAR(45) NOT NULL,
-    "first_name" VARCHAR(45),
-    "last_name" VARCHAR(45),
+    "username" VARCHAR(100),
     "twoFA" BOOLEAN,
     "twoFA_secret" VARCHAR(100),
+    "fingerprint" BOOLEAN,
     CONSTRAINT "id_UNIQUE" UNIQUE("id"),
     CONSTRAINT "username_UNIQUE" UNIQUE("email")
 );

@@ -5,7 +5,7 @@ class Authentication:
     @staticmethod
     def hash_password(password):
         salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(password.encode(), salt)
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed_password
 
     @staticmethod
@@ -16,22 +16,34 @@ class Authentication:
     def fetchUser(email):
         conn = sqlite3.connect("db.sqlite")
         cur = conn.cursor()
-        cur.execute("SELECT email, first_name, last_name FROM User WHERE email=?", (email,))
+        cur.execute("SELECT username from User where email=?", (email,))
         user: object = cur.fetchone()
         return user
+
+    @staticmethod
+    def checkDB():
+        conn = sqlite3.connect("db.sqlite")
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM User")
+        user = cur.fetchall()
+        conn.close()
+        if len(user) != 0:
+            return False
+        else:
+            return True
     
-    def login_user(email, password):
+    def login_user(password):
         try:
             conn = sqlite3.connect("db.sqlite")
             cur = conn.cursor()
 
-            cur.execute("SELECT master_password FROM User WHERE email=?", (email,))
+            cur.execute("SELECT * FROM User WHERE id=1")
             data = cur.fetchone()
 
             if data:
-                hashed_password = data[0]
+                hashed_password = data[2]
                 if Authentication.verify_password(password, hashed_password):
-                    user = Authentication.fetchUser(email)
+                    user = Authentication.fetchUser(data[1])
                     return True, user
                 else:
                     return False, 'Invalid email or password.'
@@ -46,22 +58,24 @@ class Authentication:
             if conn:
                 conn.close()
 
-    def register_user(email, password, fname, lname, twoFA=False, twoFA_secret=None):
-        print("Registering user...")
-        try:
-            conn = sqlite3.connect("db.sqlite")
-            cur = conn.cursor()
+    def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False):
+        if Authentication.checkDB():
+            try:
+                conn = sqlite3.connect("db.sqlite")
+                cur = conn.cursor()
 
-            hashed_password = Authentication.hash_password(password)
+                hashed_password = Authentication.hash_password(password)
 
-            cur.execute("INSERT INTO User (email, master_password, first_name, last_name, twoFA, twoFA_secret) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, fname, lname, twoFA, twoFA_secret))
-            conn.commit()
-            return True
+                cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint))
+                conn.commit()
+                return True
 
-        except sqlite3.Error as e:
-            print("Error accessing database:", e)
+            except sqlite3.Error as e:
+                print("Error accessing database:", e)
+                return False
+
+            finally:
+                if conn:
+                    conn.close()
+        else:
             return False
-
-        finally:
-            if conn:
-                conn.close()

@@ -12,8 +12,6 @@ class PasswordManagerApp(tk.Tk):
         self.geometry('400x200')
 
         self.login_screen = LoginScreen(self)
-        # self.registration_screen = RegistrationScreen(self)
-        # self.password_managment_screen = PasswordManagementScreen(self)
         self.registration_screen = None
         self.password_management_screen = None
 
