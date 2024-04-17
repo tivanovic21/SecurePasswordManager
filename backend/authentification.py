@@ -13,17 +13,21 @@ class Authentication:
         return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
     
     @staticmethod
-    def fetchUser(email):
+    def connectDB():
         conn = sqlite3.connect("db.sqlite")
         cur = conn.cursor()
+        return conn, cur
+    
+    @staticmethod
+    def fetchUser(email):
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT username from User where email=?", (email,))
         user: object = cur.fetchone()
         return user
 
     @staticmethod
     def checkDB():
-        conn = sqlite3.connect("db.sqlite")
-        cur = conn.cursor()
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT * FROM User")
         user = cur.fetchall()
         conn.close()
@@ -34,8 +38,7 @@ class Authentication:
     
     @staticmethod
     def fetchUserData():
-        conn = sqlite3.connect("db.sqlite")
-        cur = conn.cursor()
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT * from User")
         user = cur.fetchone()
         conn.close()
@@ -44,8 +47,7 @@ class Authentication:
         
     @staticmethod
     def updateFingerprint(status):
-        conn = sqlite3.connect("db.sqlite")
-        cur = conn.cursor()
+        conn, cur = Authentication.connectDB()
         if status == 1:
             cur.execute("UPDATE User SET fingerprint = 0")
         else:
@@ -53,10 +55,19 @@ class Authentication:
         conn.commit()
         conn.close()
     
+    def update2FA(status):
+        conn, cur = Authentication.connectDB()
+        if status == 1:
+            cur.execute("UPDATE User SET twoFA = 0")
+        else:
+            cur.execute("UPDATE User SET twoFA = 1")
+        conn.commit()
+        conn.close()
+
+    
     def login_user(password):
         try:
-            conn = sqlite3.connect("db.sqlite")
-            cur = conn.cursor()
+            conn, cur = Authentication.connectDB()
 
             cur.execute("SELECT * FROM User WHERE id=1")
             data = cur.fetchone()
@@ -82,9 +93,7 @@ class Authentication:
     def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False):
         if Authentication.checkDB():
             try:
-                conn = sqlite3.connect("db.sqlite")
-                cur = conn.cursor()
-
+                conn, cur = Authentication.connectDB()
                 hashed_password = Authentication.hash_password(password)
 
                 cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint))
