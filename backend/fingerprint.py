@@ -4,6 +4,8 @@
 # @Author   :   Luspock
 # @File     :   fingerprint.py
 
+## Original code from https://github.com/luspock/FingerPrint
+
 
 import ctypes
 from ctypes import wintypes
