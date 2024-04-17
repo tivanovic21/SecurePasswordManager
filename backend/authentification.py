@@ -1,5 +1,6 @@
 import bcrypt
 import sqlite3
+from backend.twoFA import TwoFactorAuth
 
 class Authentication:
     @staticmethod
@@ -48,23 +49,36 @@ class Authentication:
     @staticmethod
     def updateFingerprint(status):
         conn, cur = Authentication.connectDB()
+        id = Authentication.fetchUserData()[0]
         if status == 1:
-            cur.execute("UPDATE User SET fingerprint = 0")
+            cur.execute("UPDATE User SET fingerprint = 0 WHERE id=?", (id,))
         else:
-            cur.execute("UPDATE User SET fingerprint = 1")
+            cur.execute("UPDATE User SET fingerprint = 1 WHERE id=?", (id,))
         conn.commit()
         conn.close()
     
+    @staticmethod
     def update2FA(status):
         conn, cur = Authentication.connectDB()
+        id = Authentication.fetchUserData()[0]
+        firstTime = False
+
         if status == 1:
-            cur.execute("UPDATE User SET twoFA = 0")
+            cur.execute("UPDATE User SET twoFA = 0 WHERE id=?", (id,)) #turn off 2fa
         else:
-            cur.execute("UPDATE User SET twoFA = 1")
+            cur.execute("UPDATE User SET twoFA = 1 WHERE id=?", (id,)) #turn on 2fa
+            twoFA_secret = Authentication.fetchUserData()[5]
+            if twoFA_secret is None:
+                firstTime = True
+                twoFA_secret = TwoFactorAuth.generateSecret()
+                cur.execute("UPDATE User SET twoFA_secret=? WHERE id=?", (twoFA_secret, id))
+            else: 
+                firstTime = False
+        
         conn.commit()
         conn.close()
+        return firstTime
 
-    
     def login_user(password):
         try:
             conn, cur = Authentication.connectDB()

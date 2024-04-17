@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, simpledialog
 from backend.authentification import Authentication
 from backend.biometric_auth import BiometricAuth
+from backend.twoFA import TwoFactorAuth
 
 class LoginScreen(tk.Frame):
     def __init__(self, parent):
@@ -43,33 +44,64 @@ class LoginScreen(tk.Frame):
                 self.label_fingerprint.destroy()
                 self.label_fingerprint = None
 
-
     def biometric_login(self, platform):
         match platform:
             case 'macOS':
                 if BiometricAuth.touchID():
-                    userData = Authentication.fetchUserData()
-                    self.parent.set_user_data(userData[3])
-                    self.parent.show_password_management_screen()
+                    # If 2FA is on 
+                    if self.check2FA():
+                        if self.prompt_for_totp():
+                            userData = Authentication.fetchUserData()
+                            self.parent.set_user_data(userData[3])
+                            self.parent.show_password_management_screen()
+                    else:
+                        userData = Authentication.fetchUserData()
+                        self.parent.set_user_data(userData[3])
+                        self.parent.show_password_management_screen()
                 else:
                     messagebox.showerror("Login Failed", "TouchID authentication failed.")
             case 'windows':
                 if BiometricAuth.wbf():
-                    userData = Authentication.fetchUserData()
-                    self.parent.set_user_data(userData[3])
-                    self.parent.show_password_management_screen()
+                    # If 2FA is on 
+                    if self.check2FA():
+                        if self.prompt_for_totp():
+                            userData = Authentication.fetchUserData()
+                            self.parent.set_user_data(userData[3])
+                            self.parent.show_password_management_screen()
+                    else:
+                        userData = Authentication.fetchUserData()
+                        self.parent.set_user_data(userData[3])
+                        self.parent.show_password_management_screen()
                 else:
                     messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
 
-
     def login(self):
         password = self.entry_password.get()
-
         authentication_result, message = Authentication.login_user(password)
 
         if authentication_result:
-            self.parent.set_user_data(message)
-            messagebox.showinfo("Login", f"Welcome back {message}")
-            self.parent.show_password_management_screen()
+            # If 2FA is on 
+            if self.check2FA():
+                if self.prompt_for_totp():
+                    self.parent.set_user_data(message)
+                    messagebox.showinfo("Login", f"Welcome back {message}")
+                    self.parent.show_password_management_screen() 
+            else:
+                self.parent.set_user_data(message)
+                messagebox.showinfo("Login", f"Welcome back {message}")
+                self.parent.show_password_management_screen()
         else:
             messagebox.showerror("Login Failed", message)
+
+    def check2FA(self):
+        enabled = Authentication.fetchUserData()[4]
+        return enabled
+
+    def prompt_for_totp(self):
+        totp_input = simpledialog.askstring("Enter TOTP", "Please enter your TOTP:")
+        if totp_input:
+            if TwoFactorAuth.verifyToken(Authentication.fetchUserData()[5], totp_input):
+                return True
+            else:
+                messagebox.showerror("Login Failed", "Invalid TOTP. Please try again.")
+                self.prompt_for_totp()

@@ -11,11 +11,13 @@ class UserProfileScreen(tk.Frame):
         self.label_title.grid(row=0, columnspan=2, padx=10, pady=10)
 
         self.button_logout = tk.Button(self, text="Logout", command=self.logout)
-        self.button_logout.grid(row=3, columnspan=2, padx=10, pady=10)
+        self.button_logout.grid(row=4, columnspan=2, padx=10, pady=10)
 
         self.platform = BiometricAuth.checkPlatform
         self.fingerprintStatus = Authentication.fetchUserData()[6]
         self.twoFAStatus = Authentication.fetchUserData()[4]
+
+        self.label_2fa_secret = None
 
         if self.fingerprintStatus == 1:
             self.label_fingerprint = tk.Label(self, text='Fingerprint authentication: Enabled')
@@ -50,10 +52,20 @@ class UserProfileScreen(tk.Frame):
             self.button_fingerprint.config(text='Enable', command=lambda: self.update_fingerprint(0))
     
     def update_2fa(self, status):
-        Authentication.update2FA(status)
-        if(status == 0):
+        firstTime = Authentication.update2FA(status)
+        if status == 0:
             self.label_2fa.config(text='Two-factor authentication: Enabled')
             self.button_2fa.config(text='Disable', command=lambda: self.update_2fa(1))
         else: 
             self.label_2fa.config(text='Two-factor authentication: Disabled')
             self.button_2fa.config(text='Enable', command=lambda: self.update_2fa(0))
+        
+        if firstTime:
+            twoFA_secret = Authentication.fetchUserData()[5]
+            self.label_2fa_secret = tk.Text(self, height=1, width=30)
+            self.label_2fa_secret.insert(tk.END, twoFA_secret)
+            self.label_2fa_secret.config(state='disabled')
+            self.label_2fa_secret.grid(row=3, columnspan=2, padx=10, pady=10)
+        else:
+            if self.label_2fa_secret is not None:
+                self.label_2fa_secret.destroy()
