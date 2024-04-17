@@ -34,6 +34,10 @@ class LoginScreen(tk.Frame):
                 self.label_fingerprint = tk.Label(self, text='Login using TouchID', fg='red', cursor='hand2')
                 self.label_fingerprint.grid(row=4, columnspan=2, padx=10, pady=5)
                 self.label_fingerprint.bind("<Button-1>", lambda event: self.biometric_login(platform))
+            elif platform == 'windows':
+                self.label_fingerprint = tk.Label(self, text='Login using your fingerprint', fg='red', cursor='hand2')
+                self.label_fingerprint.grid(row=4, columnspan=2, padx=10, pady=5)
+                self.label_fingerprint.bind("<Button-1>", lambda event: self.biometric_login(platform))
         else:
             if self.label_fingerprint is not None:
                 self.label_fingerprint.destroy()
@@ -41,13 +45,21 @@ class LoginScreen(tk.Frame):
 
 
     def biometric_login(self, platform):
-        if platform == 'macOS':
-            if BiometricAuth.touchID():
-                userData = Authentication.fetchUserData()
-                self.parent.set_user_data(userData[3])
-                self.parent.show_password_management_screen()
-            else:
-                messagebox.showerror("Login Failed", "TouchID authentication failed.")
+        match platform:
+            case 'macOS':
+                if BiometricAuth.touchID():
+                    userData = Authentication.fetchUserData()
+                    self.parent.set_user_data(userData[3])
+                    self.parent.show_password_management_screen()
+                else:
+                    messagebox.showerror("Login Failed", "TouchID authentication failed.")
+            case 'windows':
+                if BiometricAuth.wbf():
+                    userData = Authentication.fetchUserData()
+                    self.parent.set_user_data(userData[3])
+                    self.parent.show_password_management_screen()
+                else:
+                    messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
 
 
     def login(self):

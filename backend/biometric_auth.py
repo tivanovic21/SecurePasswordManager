@@ -20,5 +20,16 @@ class BiometricAuth:
             return False
     
     @staticmethod
-    def wpf():
-        pass
+    def wbf():
+        from backend.fingerprint import FingerPrint
+        myFP = FingerPrint()
+        try:
+            myFP.open()
+            if myFP.verify():
+                return True
+            else:
+                return False
+        except:
+            return False
+        finally:
+            myFP.close()
