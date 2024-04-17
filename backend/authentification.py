@@ -41,6 +41,17 @@ class Authentication:
         conn.close()
         if user:
             return user
+        
+    @staticmethod
+    def updateFingerprint(status):
+        conn = sqlite3.connect("db.sqlite")
+        cur = conn.cursor()
+        if status == 1:
+            cur.execute("UPDATE User SET fingerprint = 0")
+        else:
+            cur.execute("UPDATE User SET fingerprint = 1")
+        conn.commit()
+        conn.close()
     
     def login_user(password):
         try:
@@ -54,7 +65,7 @@ class Authentication:
                 hashed_password = data[2]
                 if Authentication.verify_password(password, hashed_password):
                     user = Authentication.fetchUser(data[1])
-                    return True, user
+                    return True, user[0]
                 else:
                     return False, 'Invalid password.'
             else:

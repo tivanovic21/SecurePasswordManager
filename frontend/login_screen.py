@@ -1,12 +1,15 @@
 import tkinter as tk
 from tkinter import messagebox
 from backend.authentification import Authentication
+from backend.biometric_auth import BiometricAuth
 
 class LoginScreen(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent)
 
         self.parent = parent
+
+        self.label_fingerprint = None
 
         self.label_password = tk.Label(self, text="Master password:")
         self.entry_password = tk.Entry(self, show="*")
@@ -21,6 +24,32 @@ class LoginScreen(tk.Frame):
         self.button_login.grid(row=2, columnspan=2, padx=10, pady=10)
         self.label_register.grid(row=3, columnspan=2, padx=10, pady=5)
 
+    def checkFingerprint(self):
+        fingerprintStatus = Authentication.fetchUserData()[6]
+
+        if fingerprintStatus == 1:
+            platform = BiometricAuth.checkPlatform()
+
+            if platform == 'macOS':
+                self.label_fingerprint = tk.Label(self, text='Login using TouchID', fg='red', cursor='hand2')
+                self.label_fingerprint.grid(row=4, columnspan=2, padx=10, pady=5)
+                self.label_fingerprint.bind("<Button-1>", lambda event: self.biometric_login(platform))
+        else:
+            if self.label_fingerprint is not None:
+                self.label_fingerprint.destroy()
+                self.label_fingerprint = None
+
+
+    def biometric_login(self, platform):
+        if platform == 'macOS':
+            if BiometricAuth.touchID():
+                userData = Authentication.fetchUserData()
+                self.parent.set_user_data(userData[3])
+                self.parent.show_password_management_screen()
+            else:
+                messagebox.showerror("Login Failed", "TouchID authentication failed.")
+
+
     def login(self):
         password = self.entry_password.get()
 
@@ -28,7 +57,7 @@ class LoginScreen(tk.Frame):
 
         if authentication_result:
             self.parent.set_user_data(message)
-            messagebox.showinfo("Login", f"Welcome back {message[0]}")
+            messagebox.showinfo("Login", f"Welcome back {message}")
             self.parent.show_password_management_screen()
         else:
             messagebox.showerror("Login Failed", message)
