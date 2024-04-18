@@ -11,6 +11,7 @@ from backend.authentification import Authentication
 load_dotenv()
 
 class Email:
+
     @staticmethod
     def sendPasswordResetEmail(email):
         token = ''.join(random.choices(string.ascii_letters + string.digits, k=32)) # random token for pass reset
