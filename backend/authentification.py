@@ -1,5 +1,6 @@
 import bcrypt
 import sqlite3
+from backend.twoFA import TwoFactorAuth
 
 class Authentication:
     @staticmethod
@@ -13,17 +14,21 @@ class Authentication:
         return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password)
     
     @staticmethod
-    def fetchUser(email):
+    def connectDB():
         conn = sqlite3.connect("db.sqlite")
         cur = conn.cursor()
+        return conn, cur
+    
+    @staticmethod
+    def fetchUser(email):
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT username from User where email=?", (email,))
         user: object = cur.fetchone()
         return user
 
     @staticmethod
     def checkDB():
-        conn = sqlite3.connect("db.sqlite")
-        cur = conn.cursor()
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT * FROM User")
         user = cur.fetchall()
         conn.close()
@@ -34,18 +39,49 @@ class Authentication:
     
     @staticmethod
     def fetchUserData():
-        conn = sqlite3.connect("db.sqlite")
-        cur = conn.cursor()
+        conn, cur = Authentication.connectDB()
         cur.execute("SELECT * from User")
         user = cur.fetchone()
         conn.close()
         if user:
             return user
+        
+    @staticmethod
+    def updateFingerprint(status):
+        conn, cur = Authentication.connectDB()
+        id = Authentication.fetchUserData()[0]
+        if status == 1:
+            cur.execute("UPDATE User SET fingerprint = 0 WHERE id=?", (id,))
+        else:
+            cur.execute("UPDATE User SET fingerprint = 1 WHERE id=?", (id,))
+        conn.commit()
+        conn.close()
     
+    @staticmethod
+    def update2FA(status):
+        conn, cur = Authentication.connectDB()
+        id = Authentication.fetchUserData()[0]
+        firstTime = False
+
+        if status == 1:
+            cur.execute("UPDATE User SET twoFA = 0 WHERE id=?", (id,)) #turn off 2fa
+        else:
+            cur.execute("UPDATE User SET twoFA = 1 WHERE id=?", (id,)) #turn on 2fa
+            twoFA_secret = Authentication.fetchUserData()[5]
+            if twoFA_secret is None:
+                firstTime = True
+                twoFA_secret = TwoFactorAuth.generateSecret()
+                cur.execute("UPDATE User SET twoFA_secret=? WHERE id=?", (twoFA_secret, id))
+            else: 
+                firstTime = False
+        
+        conn.commit()
+        conn.close()
+        return firstTime
+
     def login_user(password):
         try:
-            conn = sqlite3.connect("db.sqlite")
-            cur = conn.cursor()
+            conn, cur = Authentication.connectDB()
 
             cur.execute("SELECT * FROM User WHERE id=1")
             data = cur.fetchone()
@@ -54,7 +90,7 @@ class Authentication:
                 hashed_password = data[2]
                 if Authentication.verify_password(password, hashed_password):
                     user = Authentication.fetchUser(data[1])
-                    return True, user
+                    return True, user[0]
                 else:
                     return False, 'Invalid password.'
             else:
@@ -71,9 +107,7 @@ class Authentication:
     def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False):
         if Authentication.checkDB():
             try:
-                conn = sqlite3.connect("db.sqlite")
-                cur = conn.cursor()
-
+                conn, cur = Authentication.connectDB()
                 hashed_password = Authentication.hash_password(password)
 
                 cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint))
