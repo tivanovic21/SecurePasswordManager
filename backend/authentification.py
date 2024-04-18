@@ -1,6 +1,7 @@
 import bcrypt
 import sqlite3
 from backend.twoFA import TwoFactorAuth
+from datetime import datetime
 
 class Authentication:
     @staticmethod
@@ -78,6 +79,33 @@ class Authentication:
         conn.commit()
         conn.close()
         return firstTime
+    
+    @staticmethod
+    def saveTokenExpiration(email, token, expiration):
+        conn, cur = Authentication.connectDB()
+        cur.execute("UPDATE User SET token=?, token_expiration=? WHERE email=?", (token, expiration, email))
+        conn.commit()
+        conn.close()
+
+    @staticmethod
+    def checkToken(email, token):
+        conn, cur = Authentication.connectDB()
+        cur.execute("SELECT token, token_expiration FROM User WHERE email=?", (email,))
+        userToken, userExpiration = cur.fetchone()
+        conn.close()
+
+        if token == userToken and datetime.now() <= datetime.strptime(userExpiration, '%Y-%m-%d %H:%M:%S.%f'):
+            return True
+        else:
+            return False
+        
+    @staticmethod
+    def saveNewPassword(email, password):
+        conn, cur = Authentication.connectDB()
+        hashed_password = Authentication.hash_password(password)
+        cur.execute("UPDATE User SET master_password=?, token=NULL, token_expiration=NULL WHERE email=?", (hashed_password, email))
+        conn.commit()
+        conn.close()
 
     def login_user(password):
         try:

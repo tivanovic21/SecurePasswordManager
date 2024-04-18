@@ -13,6 +13,8 @@ CREATE TABLE "User"(
     "twoFA" BOOLEAN,
     "twoFA_secret" VARCHAR(100),
     "fingerprint" BOOLEAN,
+    "token" VARCHAR(100),
+    "token_expiration" DATETIME,
     CONSTRAINT "id_UNIQUE" UNIQUE("id"),
     CONSTRAINT "username_UNIQUE" UNIQUE("email")
 );
