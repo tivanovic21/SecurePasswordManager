@@ -1,5 +1,6 @@
 import random, string
 from cryptography.fernet import Fernet
+from backend.authentification import Authentication
 
 class PasswordManager:
     def __init__(self, key):
@@ -18,3 +19,33 @@ class PasswordManager:
         pass_list = list(password)
         random.shuffle(pass_list)
         return ''.join(pass_list)
+    
+    def get_user_passwords(self, user_id):
+        conn, cur = Authentication.connectDB()
+        cur.execute("""
+            SELECT p.password, w.name
+            FROM Password p
+            JOIN Websites w ON p.Websites_id = w.id
+            WHERE p.User_id = ?
+        """, (user_id,))
+        passwords = cur.fetchall()
+        conn.close()
+        return passwords
+
+    def add_password(self, user_id, website_id, password):
+        conn, cur = Authentication.connectDB()
+        cur.execute("""
+            INSERT INTO Password (password, User_id, Websites_id)
+            VALUES (?, ?, ?)
+        """, (password, user_id, website_id))
+        conn.commit()
+        conn.close()
+
+    def add_website(self, user_id, website_name, domain):
+        conn, cur = Authentication.connectDB()
+        cur.execute("""
+            INSERT INTO Websites (name, User_id, domain)
+            VALUES (?, ?)
+        """, (website_name, user_id, domain))
+        conn.commit()
+        conn.close()

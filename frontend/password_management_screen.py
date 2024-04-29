@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from backend.password_managment import PasswordManager
+from frontend.add_account_screen import AddAccountScreen
 
 class PasswordManagementScreen(tk.Frame):
     def __init__(self, parent):
@@ -46,7 +48,7 @@ class PasswordManagementScreen(tk.Frame):
         self.entry_search = tk.Entry(self.main_frame, textvariable=self.search_var)
         self.entry_search.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
 
-        # Sample data
+        # Fetch data
         self.populate_table()
 
     def logout(self):
@@ -54,8 +56,10 @@ class PasswordManagementScreen(tk.Frame):
         pass
 
     def add_account(self):
-        # add new acc func
-        pass
+        add_account_screen = AddAccountScreen(self)
+        add_account_screen.grab_set()
+        self.wait_window(add_account_screen)
+
 
     def filter_table(self, *args):
         search_query = self.search_var.get().lower()
@@ -69,13 +73,7 @@ class PasswordManagementScreen(tk.Frame):
                 self.tree.selection_remove(child)
 
     def populate_table(self):
-        # Sample data
-        data = [
-            ("Facebook", "user1", "password1"),
-            ("Twitter", "user2", "password2"),
-            ("Instagram", "user3", "password3"),
-            ("LinkedIn", "user4", "password4"),
-            ("Pinterest", "user5", "password5")
-        ]
-        for i, (app_name, username, password) in enumerate(data, start=1):
-            self.tree.insert("", "end", text=str(i), values=(app_name, username, password))
+        data = PasswordManager.get_user_passwords(self, 1)
+        print("data: ", data)
+        for i, (password, app_name) in enumerate(data, start=1):
+            self.tree.insert("", "end", text=str(i), values=(app_name, "username", password))
