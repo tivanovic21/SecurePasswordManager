@@ -1,6 +1,6 @@
 import random, string
 from cryptography.fernet import Fernet
-from backend.authentification import Authentication
+from backend.authentication import Authentication
 
 class PasswordManager:
     def __init__(self, key):
@@ -33,19 +33,30 @@ class PasswordManager:
         return passwords
 
     def add_password(self, user_id, website_id, password):
+        print("--- ADD PASS FUNKCIJA ---")
+        print("user_id: ", user_id, "website_id: ", website_id, "password: ", password)
         conn, cur = Authentication.connectDB()
         cur.execute("""
-            INSERT INTO Password (password, User_id, Websites_id)
+            INSERT INTO Password (User_id, Websites_id, password)
             VALUES (?, ?, ?)
-        """, (password, user_id, website_id))
+        """, (user_id, website_id, password))
         conn.commit()
         conn.close()
 
-    def add_website(self, user_id, website_name, domain):
+    def add_website(self, website_name, domain, user_id):
+        conn, cur = Authentication.connectDB()
+        cur.execute("INSERT INTO Websites (name, domain, User_id) VALUES (?, ?, ?)", (website_name, domain, user_id))
+        conn.commit()
+        website_id = cur.lastrowid
+        conn.close()
+        return website_id
+
+    def check_website_exists(self, website_name, domain, user_id):
         conn, cur = Authentication.connectDB()
         cur.execute("""
-            INSERT INTO Websites (name, User_id, domain)
-            VALUES (?, ?)
-        """, (website_name, user_id, domain))
-        conn.commit()
+            SELECT id FROM Websites
+            WHERE name=? AND domain=? AND User_id=?
+        """, (website_name, domain, user_id))
+        website = cur.fetchone()
         conn.close()
+        return website[0] if website else None

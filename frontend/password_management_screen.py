@@ -1,5 +1,7 @@
 import tkinter as tk
+from tkinter import messagebox
 from tkinter import ttk
+from backend.authentication import Authentication
 from backend.password_managment import PasswordManager
 from frontend.add_account_screen import AddAccountScreen
 
@@ -52,14 +54,40 @@ class PasswordManagementScreen(tk.Frame):
         self.populate_table()
 
     def logout(self):
-        # logout func
-        pass
+        self.parent.show_login_screen()
 
     def add_account(self):
         add_account_screen = AddAccountScreen(self)
         add_account_screen.grab_set()
         self.wait_window(add_account_screen)
+        if add_account_screen.password_data:
+            password_data = add_account_screen.password_data
+            website_name = password_data["app_name"]
+            username = password_data["username"]
+            password = password_data["password"]
+            domain = password_data["domain"]
+            user_id = 1
 
+            print("website_name: ", website_name, "username: ", username, "password: ", password, "domain: ", domain, "user_id: ", user_id)
+
+            website_id = self.check_website_exists(website_name, domain, user_id)
+            print("website_id: ", website_id)
+            if website_id:
+                # WEBSITE EXISTS, INSERT INTO PASSWORD TABLE
+                PasswordManager.add_password(self, user_id, website_id, password)
+            else:
+                # INSERT INTO WEBSITE AND INTO PASSWORD TABLE
+                website_id = self.insert_into_websites(website_name, domain, user_id)
+                if website_id:
+                    PasswordManager.add_password(self, user_id, website_id, password)
+                else:
+                    messagebox.showerror("Error", "Failed to add account")
+
+    def check_website_exists(self, website_name, domain, user_id):
+        return PasswordManager.check_website_exists(self, website_name, domain, user_id)
+
+    def insert_into_websites(self, website_name, domain, user_id):
+        return PasswordManager.add_website(self, website_name, domain, user_id)
 
     def filter_table(self, *args):
         search_query = self.search_var.get().lower()
@@ -77,3 +105,4 @@ class PasswordManagementScreen(tk.Frame):
         print("data: ", data)
         for i, (password, app_name) in enumerate(data, start=1):
             self.tree.insert("", "end", text=str(i), values=(app_name, "username", password))
+

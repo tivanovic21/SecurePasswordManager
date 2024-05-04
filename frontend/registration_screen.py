@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
-from backend.authentification import Authentication
+from backend.authentication import Authentication
 from backend.password_managment import PasswordManager
 
 class RegistrationScreen(tk.Frame):

@@ -10,6 +10,8 @@ class AddAccountScreen(tk.Toplevel):
         self.title("Add Account")
         self.parent = parent
 
+        self.password_data = {}
+
         self.label_app_name = tk.Label(self, text="App Name:")
         self.label_username = tk.Label(self, text="Username:")
         self.label_password = tk.Label(self, text="Password:")
@@ -52,9 +54,21 @@ class AddAccountScreen(tk.Toplevel):
         if not app_name or not username or not password:
             messagebox.showerror("Error", "App Name, Username, and Password fields are required")
             return
+    
+        self.password_data = {
+            "app_name" : app_name,
+            "username" : username,
+            "password" : password,
+            "domain" : domain
+        }
+
+        user_id = 1
+        website_id = PasswordManager.check_website_exists(self, app_name, domain, user_id)
 
         # save to db
-        PasswordManager.save_password(app_name, username, password, domain)
+        print("---- PRIJE DODAVANJA ----")
+        print("user_id: ", user_id, "website_id: ", website_id, "password: ", password)
+        PasswordManager.add_password(self, user_id, website_id, password)
         messagebox.showinfo("Success", "Password added successfully")
         self.destroy()
 
