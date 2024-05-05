@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter import simpledialog
 from backend.password_managment import PasswordManager
+from backend.database import PasswordDatabase
 
 class AddAccountScreen(tk.Toplevel):
     def __init__(self, parent):
@@ -54,21 +55,15 @@ class AddAccountScreen(tk.Toplevel):
         if not app_name or not username or not password:
             messagebox.showerror("Error", "App Name, Username, and Password fields are required")
             return
-    
-        self.password_data = {
-            "app_name" : app_name,
-            "username" : username,
-            "password" : password,
-            "domain" : domain
-        }
 
         user_id = 1
-        website_id = PasswordManager.check_website_exists(self, app_name, domain, user_id)
+        app_id = PasswordDatabase.check_app_exists(self, app_name, domain, user_id)
+
+        if app_id is None:
+            app_id = PasswordDatabase.add_app(self, app_name, domain, user_id)
 
         # save to db
-        print("---- PRIJE DODAVANJA ----")
-        print("user_id: ", user_id, "website_id: ", website_id, "password: ", password)
-        PasswordManager.add_password(self, user_id, website_id, password)
+        PasswordDatabase.add_password(self, user_id, app_id, username, password)
         messagebox.showinfo("Success", "Password added successfully")
         self.destroy()
 

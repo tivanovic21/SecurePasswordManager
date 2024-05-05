@@ -18,22 +18,23 @@ CREATE TABLE "User"(
     CONSTRAINT "id_UNIQUE" UNIQUE("id"),
     CONSTRAINT "username_UNIQUE" UNIQUE("email")
 );
-CREATE TABLE "Websites"(
+CREATE TABLE "Application"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    "name" VARCHAR(45),
+    "app_name" VARCHAR(45),
     "domain" VARCHAR(45),
     "User_id" INTEGER NOT NULL,
-    CONSTRAINT "fk_Websites_User" FOREIGN KEY("User_id") REFERENCES "User"("id")
+    CONSTRAINT "fk_Application_User" FOREIGN KEY("User_id") REFERENCES "User"("id")
 );
-CREATE INDEX "Websites.fk_Websites_User_idx" ON "Websites" ("User_id");
+CREATE INDEX "Application.fk_Application_User_idx" ON "Application" ("User_id");
 CREATE TABLE "Password"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    "username" VARCHAR(100) NOT NULL,
     "password" VARCHAR(1000) NOT NULL,
     "User_id" INTEGER NOT NULL,
-    "Websites_id" INTEGER NOT NULL,
+    "Application_id" INTEGER NOT NULL,
     CONSTRAINT "fk_Password_User1" FOREIGN KEY("User_id") REFERENCES "User"("id"),
-    CONSTRAINT "fk_Password_Websites1" FOREIGN KEY("Websites_id") REFERENCES "Websites"("id")
+    CONSTRAINT "fk_Password_Application1" FOREIGN KEY("Application_id") REFERENCES "Application"("id")
 );
 CREATE INDEX "Password.fk_Password_User1_idx" ON "Password" ("User_id");
-CREATE INDEX "Password.fk_Password_Websites1_idx" ON "Password" ("Websites_id");
+CREATE INDEX "Password.fk_Password_Application1_idx" ON "Password" ("Application_id");
 COMMIT;
