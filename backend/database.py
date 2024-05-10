@@ -1,37 +1,36 @@
 import sqlite3
+from cryptography.fernet import Fernet
 from backend.authentication import Authentication
 
 class PasswordDatabase:
     def __init__(self, db_file):
         self.conn = sqlite3.connect(db_file)
         self.cur = self.conn.cursor()
+        self.key = None
 
-    def create_table(self):
-        self.cur.execute('''CREATE TABLE IF NOT EXISTS passwords (
-                            id INTEGER PRIMARY KEY,
-                            website TEXT,
-                            username TEXT,
-                            password TEXT
-                            )''')
-        self.conn.commit()
+    def set_encryption_key(self, key):
+        self.key = key
 
-    def insert_password(self, website, username, password):
-        self.cur.execute("INSERT INTO Password (website, username, password) VALUES (?, ?, ?)",
-                          (website, username, password))
-        self.conn.commit()
-
-    def get_all_passwords(self):
-        self.cur.execute("SELECT * FROM Password")
-        return self.cur.fetchall()
+    def encrypt_password(self, password):
+        print(self.key)
+        if self.key:
+            fernet = Fernet(self.key)
+            return fernet.encrypt(password.encode()).decode()
+        else:
+            raise ValueError("Encryption key not set")
+        
+    def decrypt_password(self, encrypted_password):
+        if self.key:
+            fernet = Fernet(self.key)
+            return fernet.decrypt(encrypted_password).decode()
+        else:
+            raise ValueError("Encryption key not set")
 
     def delete_password(self, password_id):
         conn, cur = Authentication.connectDB()
         cur.execute("DELETE FROM Password WHERE id=?", (password_id,))
         conn.commit()
         conn.close()
-
-    def close(self):
-        self.conn.close()
 
     # CRUD operations for Password and Application tables
 
@@ -62,16 +61,17 @@ class PasswordDatabase:
         return passwords
 
     def add_password(self, user_id, app_id, username, password):
-        print("--- ADD PASS FUNKCIJA ---")
+        encrypted_pass = self.encrypt_password(password)
         conn, cur = Authentication.connectDB()
         cur.execute("""
             INSERT INTO Password (User_id, Application_id, username, password)
             VALUES (?, ?, ?, ?)
-        """, (user_id, app_id, username, password))
+        """, (user_id, app_id, username, encrypted_pass))
         conn.commit()
         conn.close()
 
     def update_password(self, password_id, updated_data):
+        encrypted_pass = self.encrypt_password(updated_data["password"])
         conn, cur = Authentication.connectDB()
         cur.execute(""" 
             UPDATE Application
@@ -82,7 +82,7 @@ class PasswordDatabase:
             UPDATE Password
             SET username=?, password=?, Application_id=?
             WHERE id=?
-        """, (updated_data["username"], updated_data["password"], updated_data["app_id"], password_id))
+        """, (updated_data["username"], encrypted_pass, updated_data["app_id"], password_id))
         conn.commit()
         conn.close()
 
@@ -102,6 +102,6 @@ class PasswordDatabase:
             SELECT id FROM Application
             WHERE app_name=? AND domain=? AND User_id=?
         """, (app_name, domain, user_id))
-        website = cur.fetchone()
+        app = cur.fetchone()
         conn.close()
-        return website[0] if website else None
+        return app[0] if app else None

@@ -1,10 +1,10 @@
 import random, string
 from cryptography.fernet import Fernet
-from backend.authentication import Authentication
 
 class PasswordManager:
     def __init__(self, key):
         self.key = key
+        print("self.key: ", self.key)
 
     def encrypt_password(self, password):
         cipher_suite = Fernet(self.key)

@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from backend.authentication import Authentication
 from backend.password_managment import PasswordManager
+from backend.database import PasswordDatabase
 
 class RegistrationScreen(tk.Frame):
     def __init__(self, parent):
@@ -60,7 +61,7 @@ class RegistrationScreen(tk.Frame):
         else:
             result, message = Authentication.register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False)
             if result: 
-                messagebox.showinfo("Login", message)
+                PasswordManager.__init__(self, Authentication.hash_password(password))
                 self.parent.show_login_screen()
             elif not result:
                 messagebox.showerror("Error", message)

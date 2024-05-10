@@ -63,6 +63,7 @@ class AddAccountScreen(tk.Toplevel):
             app_id = PasswordDatabase.add_app(self, app_name, domain, user_id)
 
         # save to db
+        encrypted_pass = PasswordManager.encrypt_password(self, password)
         PasswordDatabase.add_password(self, user_id, app_id, username, password)
         messagebox.showinfo("Success", "Password added successfully")
         self.destroy()
