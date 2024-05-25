@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-from backend.authentification import Authentication
+from backend.authentication import Authentication
 
 load_dotenv()
 

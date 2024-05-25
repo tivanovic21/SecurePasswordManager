@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
-from backend.authentification import Authentication
+from backend.authentication import Authentication
 from backend.biometric_auth import BiometricAuth
 from backend.twoFA import TwoFactorAuth
 from backend.email import Email

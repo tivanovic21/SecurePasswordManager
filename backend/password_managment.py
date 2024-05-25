@@ -4,6 +4,7 @@ from cryptography.fernet import Fernet
 class PasswordManager:
     def __init__(self, key):
         self.key = key
+        print("self.key: ", self.key)
 
     def encrypt_password(self, password):
         cipher_suite = Fernet(self.key)

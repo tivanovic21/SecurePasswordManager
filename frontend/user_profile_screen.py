@@ -1,6 +1,6 @@
 import tkinter as tk
 from backend.biometric_auth import BiometricAuth
-from backend.authentification import Authentication
+from backend.authentication import Authentication
 
 class UserProfileScreen(tk.Frame):
     def __init__(self, parent):
@@ -9,9 +9,6 @@ class UserProfileScreen(tk.Frame):
         self.parent = parent
         self.label_title = tk.Label(self, text='Welcome ' + self.parent.user_data + '!')
         self.label_title.grid(row=0, columnspan=2, padx=10, pady=10)
-
-        self.button_logout = tk.Button(self, text="Logout", command=self.logout)
-        self.button_logout.grid(row=4, columnspan=2, padx=10, pady=10)
 
         self.platform = BiometricAuth.checkPlatform
         self.fingerprintStatus = Authentication.fetchUserData()[6]
@@ -38,9 +35,6 @@ class UserProfileScreen(tk.Frame):
 
         self.label_2fa.grid(row=2, columnspan=1, column=1, padx=10, pady=10)
         self.button_2fa.grid(row=2, columnspan=1, column=2, padx=10, pady=10)
-
-    def logout(self):
-        self.parent.show_login_screen()
 
     def update_fingerprint(self, status):
         Authentication.updateFingerprint(status)
