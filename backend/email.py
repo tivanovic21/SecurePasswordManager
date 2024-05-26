@@ -2,13 +2,13 @@ import smtplib
 import random
 import string
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from backend.authentication import Authentication
 
-load_dotenv()
+#load_dotenv()
 
 class Email:
 

@@ -21,12 +21,22 @@ class RegistrationScreen(tk.Frame):
         self.entry_confirm_password = tk.Entry(self, show="*")
         self.entry_username = tk.Entry(self)
 
-        self.button_register = tk.Button(self, text="Register", command=self.register)
-        self.button_generate_password = tk.Button(self, text="Generate Password", command=self.generate_password)
+        self.button_register = tk.Button(self, text="Register", command=self.register, bg="purple", fg="white")
+        self.button_generate_password = tk.Button(self, text="Generate Password", command=self.generate_password, bg="purple", fg="white")
+
+        self.button_register.bind("<Enter>", lambda event: self.button_register.config(bg="purple", fg="white"))
+        self.button_register.bind("<Leave>", lambda event: self.button_register.config(bg="SystemButtonFace", fg="black"))
+
+        self.button_generate_password.bind("<Enter>", lambda event: self.button_generate_password.config(bg="purple", fg="white"))
+        self.button_generate_password.bind("<Leave>", lambda event: self.button_generate_password.config(bg="SystemButtonFace", fg="black"))
+
+        self.button_register.grid(row=5, columnspan=2, padx=10, pady=10, sticky="nsew")  # Center horizontally
+        self.button_generate_password.grid(row=4, columnspan=2, padx=10, pady=5, sticky="nsew")  # Center horizontally
+
         self.show_password_var = tk.BooleanVar()
         self.show_password_checkbox = tk.Checkbutton(self, text="Show Password", variable=self.show_password_var, command=self.toggle_password_visibility)
 
-        self.label_login = tk.Label(self, text="Existing user? Log in!", fg="cyan", cursor="hand2")
+        self.label_login = tk.Label(self, text="Existing user? Log in!", fg="purple", cursor="hand2")
         self.label_login.bind("<Button-1>", lambda event: self.parent.show_login_screen())
 
         self.label_email.grid(row=0, column=0, padx=10, pady=5, sticky="e")

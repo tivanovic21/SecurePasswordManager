@@ -14,22 +14,27 @@ class PasswordManagementScreen(tk.Frame):
         self.parent = parent  
 
         # Sidebar
-        self.sidebar_frame = tk.Frame(self, bg="gray")
+        self.sidebar_frame = tk.Frame(self, bg="black")
         self.sidebar_frame.grid(row=0, column=0, sticky="ns")
         
-        self.label_user_profile = tk.Label(self.sidebar_frame, text="User Profile", fg="cyan", cursor="hand2")
+        self.label_user_profile = tk.Label(self.sidebar_frame, text="User Profile", fg="white", cursor="hand2", bg="purple", highlightthickness=1, highlightbackground="black")
         self.label_user_profile.bind("<Button-1>", lambda event: self.parent.show_user_profile_screen())
         self.label_user_profile.grid(row=0, pady=(20, 10))
 
-        self.button_logout = tk.Button(self.sidebar_frame, text="Logout", command=self.logout)
-        self.button_logout.grid(row=1, pady=(0, 20))
+        self.button_logout = tk.Button(self.sidebar_frame, text="Logout", command=self.logout, bg="white")
+        self.button_logout.bind("<Enter>", lambda event: self.button_logout.config(bg="purple", fg="white"))
+        self.button_logout.bind("<Leave>", lambda event: self.button_logout.config(bg="white", fg="black"))
+        self.button_logout.grid(row=1, pady=(215, 0))  # Top margin of 20px
 
+        
         # Main content
         self.main_frame = tk.Frame(self)
         self.main_frame.grid(row=0, column=1, sticky="nsew")
 
-        self.button_add_account = tk.Button(self.main_frame, text="Add New Account", command=self.add_account)
-        self.button_add_account.grid(row=0, column=0, padx=10, pady=10)
+        self.button_add_account = tk.Button(self.main_frame, text="Add New Account", command=self.add_account, bg="white")
+        self.button_add_account.bind("<Enter>", lambda event, button=self.button_add_account: on_enter_button(button))
+        self.button_add_account.bind("<Leave>", lambda event, button=self.button_add_account: on_leave_button(button))
+        self.button_add_account.grid(row=0, column=0, padx=10, pady=10)  # Center horizontally
 
         self.tree = ttk.Treeview(self.main_frame, columns=("App Name", "Domain", "Username", "Password"))
         self.tree.heading("#0", text="ID")
@@ -38,10 +43,10 @@ class PasswordManagementScreen(tk.Frame):
         self.tree.heading("Username", text="Username")
         self.tree.heading("Password", text="Password")
         self.tree.column("#0", width=50)
-        self.tree.column("App Name", width=150)
+        self.tree.column("App Name", width=200)
         self.tree.column("Domain", width=150)
-        self.tree.column("Username", width=150)
-        self.tree.column("Password", width=150)
+        self.tree.column("Username", width=200)
+        self.tree.column("Password", width=200)
         self.tree.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
         self.scrollbar = ttk.Scrollbar(self.main_frame, orient="vertical", command=self.tree.yview)
@@ -56,6 +61,12 @@ class PasswordManagementScreen(tk.Frame):
 
         # Fetch data
         self.populate_table()
+
+
+    def on_enter_button(button):
+        button.config(bg="purple", fg="white")
+    def on_leave_button(button):
+        button.config(bg="white", fg="black")
 
     def logout(self):
         self.parent.show_login_screen()

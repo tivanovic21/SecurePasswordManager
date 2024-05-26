@@ -14,20 +14,38 @@ class LoginScreen(tk.Frame):
         self.label_fingerprint = None
         self.fingerprintStatus = None
 
-        self.label_password = tk.Label(self, text="Master password:")
-        self.entry_password = tk.Entry(self, show="*")
+        self.label_title = tk.Label(self, text="Password Manager", font=("Helvetica", 20, "bold"))
+        self.label_title.grid(row=0, column=0, columnspan=2, padx=(300, 300), pady=(20, 10), sticky="nsew")  # Left and right margin of 200
 
-        self.button_login = tk.Button(self, text="Login", command=self.login)
-        self.button_reset_password = tk.Button(self, text="Reset Password", command=self.resetPassword)
+# Master password label and entry
+        self.label_password = tk.Label(self, text="Master password:")
+        self.label_password.grid(row=1, column=0, padx=(300, 10), pady=5, sticky="e")  # Left margin of 200
+
+        self.entry_password = tk.Entry(self, show="*")
+        self.entry_password.grid(row=1, column=1, padx=(10, 300), pady=(15,5), sticky="w")  # Right margin of 200
+
+        self.button_login = tk.Button(self, text="Login", command=self.login, bg="purple", fg="white")
+        self.button_reset_password = tk.Button(self, text="Reset Password", command=self.resetPassword, bg="purple", fg="white")
+
+        self.button_login.bind("<Enter>", lambda event: self.button_login.config(bg="purple", fg="white"))
+        self.button_login.bind("<Leave>", lambda event: self.button_login.config(bg="SystemButtonFace", fg="black"))
+
+        self.button_reset_password.bind("<Enter>", lambda event: self.button_reset_password.config(bg="purple", fg="white"))
+        self.button_reset_password.bind("<Leave>", lambda event: self.button_reset_password.config(bg="SystemButtonFace", fg="black"))
+
+        self.button_login.grid(row=2, column=0, padx=10, pady=15, columnspan=2, sticky="nsew")  # Center horizontally
+        self.button_reset_password.grid(row=3, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")  # Center horizontally
 
         self.label_register = tk.Label(self, text="New user? Register!", fg="cyan", cursor="hand2")
         self.label_register.bind("<Button-1>", lambda event: self.parent.show_registration_screen())
+        self.label_register.grid(row=4, column=0, columnspan=2, padx=(200, 200), pady=(40, 5), sticky="nsew")  # Top margin of 50
 
-        self.label_password.grid(row=1, column=0, padx=10, pady=5, sticky="e")
-        self.entry_password.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        self.button_login.grid(row=2, column=0, padx=10, pady=10)
-        self.button_reset_password.grid(row=2, column=1, padx=10, pady=10)
-        self.label_register.grid(row=3, columnspan=2, padx=10, pady=5)
+
+        self.label_register = tk.Label(self, text="New user? Register!", fg="purple", cursor="hand2")
+        self.label_register.bind("<Button-1>", lambda event: self.parent.show_registration_screen())
+        self.label_register.grid(row=4, column=0, columnspan=2, padx=(200, 200), pady=(40, 5), sticky="nsew")  # Top margin of 50
+
+   
 
     def resetPassword(self):
         email = simpledialog.askstring('Reset Password', 'Please enter your email address:')
@@ -67,36 +85,35 @@ class LoginScreen(tk.Frame):
                         self.label_fingerprint = None
 
 
-    def biometricLogin(self, platform):
-        match platform:
-            case 'macOS':
-                if BiometricAuth.touchID():
-                    # If 2FA is on 
-                    if self.check2FA():
-                        if self.promptForTOTP():
-                            userData = Authentication.fetchUserData()
-                            self.parent.set_user_data(userData[3])
-                            self.parent.show_password_management_screen()
-                    else:
-                        userData = Authentication.fetchUserData()
-                        self.parent.set_user_data(userData[3])
-                        self.parent.show_password_management_screen()
-                else:
-                    messagebox.showerror("Login Failed", "TouchID authentication failed.")
-            case 'windows':
-                if BiometricAuth.wbf():
-                    # If 2FA is on 
-                    if self.check2FA():
-                        if self.promptForTOTP():
-                            userData = Authentication.fetchUserData()
-                            self.parent.set_user_data(userData[3])
-                            self.parent.show_password_management_screen()
-                    else:
-                        userData = Authentication.fetchUserData()
-                        self.parent.set_user_data(userData[3])
-                        self.parent.show_password_management_screen()
-                else:
-                    messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
+    #def biometricLogin(self, platform):
+      #  match platform:
+      #      case 'macOS':
+      #          if BiometricAuth.touchID():
+       #             # If 2FA is on 
+         #           if self.check2FA():
+       #                 if self.promptForTOTP():
+       #                     userData = Authentication.fetchUserData()
+      #                      self.parent.set_user_data(userData[3])
+      #                      self.parent.show_password_management_screen()
+       #             else:
+        #                userData = Authentication.fetchUserData()
+         #               self.parent.set_user_data(userData[3])
+          #              self.parent.show_password_management_screen()
+           ##        messagebox.showerror("Login Failed", "TouchID authentication failed.")
+            #case 'windows':
+             #   if BiometricAuth.wbf():
+              #      # If 2FA is on 
+               #     if self.check2FA():
+                  #    if self.promptForTOTP():
+                 #           userData = Authentication.fetchUserData()
+                  #          self.parent.set_user_data(userData[3])
+                   #         self.parent.show_password_management_screen()
+                #    else:
+               #         userData = Authentication.fetchUserData()
+              #          self.parent.set_user_data(userData[3])
+              #          self.parent.show_password_management_screen()
+              #  else:
+              #      messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
 
     def login(self):
         password = self.entry_password.get()
