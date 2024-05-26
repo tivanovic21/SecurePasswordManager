@@ -23,8 +23,12 @@ class AddAccountScreen(tk.Toplevel):
         self.entry_password = tk.Entry(self, show="*")
         self.entry_domain = tk.Entry(self)
 
-        self.button_add_password = tk.Button(self, text="Add Password", command=self.add_password)
-        self.button_generate_password = tk.Button(self, text="Generate Strong Password", command=self.generate_password)
+        self.button_add_password = tk.Button(self, text="Add Password", command=self.add_password, bg="purple", fg="white", width=25)
+        self.button_add_password.bind("<Enter>", self.on_enter_button)
+        self.button_add_password.bind("<Leave>", self.on_leave_button)
+        self.button_generate_password = tk.Button(self, text="Generate Strong Password", command=self.generate_password, bg="purple", fg="white", width=25)
+        self.button_generate_password.bind("<Enter>", self.on_enter_button)
+        self.button_generate_password.bind("<Leave>", self.on_leave_button)
 
         self.show_password_var = tk.IntVar()
         self.checkbox_show_password = tk.Checkbutton(self, text="Show Password", variable=self.show_password_var, command=self.toggle_password_visibility)
@@ -41,10 +45,17 @@ class AddAccountScreen(tk.Toplevel):
         self.label_domain.grid(row=3, column=0, padx=10, pady=5, sticky="e")
         self.entry_domain.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-        self.button_add_password.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
+        self.button_add_password.grid(row=4, column=0, columnspan=2, padx=100, pady=10)
         self.button_generate_password.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
 
         self.checkbox_show_password.grid(row=6, column=0, columnspan=2, padx=10, pady=5)
+
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
+
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
+
 
     def add_password(self):
         app_name = self.entry_app_name.get()

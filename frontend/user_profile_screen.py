@@ -17,10 +17,10 @@ class UserProfileScreen(tk.Frame):
         self.label_2fa_secret = None
 
         if self.fingerprintStatus == 1:
-            self.label_fingerprint = tk.Label(self, text='Fingerprint authentication: Enabled')
-            self.button_fingerprint = tk.Button(self, text="Disable", command=lambda: self.update_fingerprint(1))
+            self.label_fingerprint = tk.Label(self, text='Fingerprint authentication: Enabled', bg="purple", fg="white")
+            self.button_fingerprint = tk.Button(self, text="Disable", command=lambda: self.update_fingerprint(1), bg="purple", fg="white")
         else:
-            self.label_fingerprint = tk.Label(self, text='Fingerprint authentication: Disabled')
+            self.label_fingerprint = tk.Label(self, text='Fingerprint authentication: Disabled', bg="white", fg="black")
             self.button_fingerprint = tk.Button(self, text="Enable", command=lambda: self.update_fingerprint(0))
 
         if self.twoFAStatus == 1:
@@ -35,6 +35,12 @@ class UserProfileScreen(tk.Frame):
 
         self.label_2fa.grid(row=2, columnspan=1, column=1, padx=10, pady=10)
         self.button_2fa.grid(row=2, columnspan=1, column=2, padx=10, pady=10)
+
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
+
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
 
     def update_fingerprint(self, status):
         Authentication.updateFingerprint(status)

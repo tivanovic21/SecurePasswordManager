@@ -19,23 +19,30 @@ class PasswordManagementScreen(tk.Frame):
         
         self.label_user_profile = tk.Label(self.sidebar_frame, text="User Profile", fg="white", cursor="hand2", bg="purple", highlightthickness=1, highlightbackground="black")
         self.label_user_profile.bind("<Button-1>", lambda event: self.parent.show_user_profile_screen())
+        self.label_user_profile.bind("<Enter>", self.on_enter_button)
+        self.label_user_profile.bind("<Leave>", self.on_leave_button)
         self.label_user_profile.grid(row=0, pady=(20, 10))
 
-        self.button_logout = tk.Button(self.sidebar_frame, text="Logout", command=self.logout, bg="white")
-        self.button_logout.bind("<Enter>", lambda event: self.button_logout.config(bg="purple", fg="white"))
-        self.button_logout.bind("<Leave>", lambda event: self.button_logout.config(bg="white", fg="black"))
-        self.button_logout.grid(row=1, pady=(215, 0))  # Top margin of 20px
-
-        
+        self.button_logout = tk.Button(self.sidebar_frame, text="Logout", command=self.logout, bg="purple", fg="white")
+        self.button_logout.bind("<Enter>", self.on_enter_button)
+        self.button_logout.bind("<Leave>", self.on_leave_button)
+        self.button_logout.grid(row=1, pady=(255, 0))  # Adjust top margin as needed
+      
         # Main content
         self.main_frame = tk.Frame(self)
         self.main_frame.grid(row=0, column=1, sticky="nsew")
 
-        self.button_add_account = tk.Button(self.main_frame, text="Add New Account", command=self.add_account, bg="white")
-        self.button_add_account.bind("<Enter>", lambda event, button=self.button_add_account: on_enter_button(button))
-        self.button_add_account.bind("<Leave>", lambda event, button=self.button_add_account: on_leave_button(button))
-        self.button_add_account.grid(row=0, column=0, padx=10, pady=10)  # Center horizontally
+        # Search label
+        label_search = tk.Label(self.main_frame, text="Search by website name:")
+        label_search.grid(row=0, column=0, padx=10, pady=(10, 5), sticky="w")
 
+        # Search bar
+        self.search_var = tk.StringVar()
+        self.search_var.trace_add("write", self.filter_table)
+        self.entry_search = tk.Entry(self.main_frame, textvariable=self.search_var)
+        self.entry_search.grid(row=1, column=0, padx=10, pady=(0, 10), sticky="ew")
+
+        # Treeview widget
         self.tree = ttk.Treeview(self.main_frame, columns=("App Name", "Domain", "Username", "Password"))
         self.tree.heading("#0", text="ID")
         self.tree.heading("App Name", text="App Name")
@@ -47,26 +54,32 @@ class PasswordManagementScreen(tk.Frame):
         self.tree.column("Domain", width=150)
         self.tree.column("Username", width=200)
         self.tree.column("Password", width=200)
-        self.tree.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        self.tree.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="nsew")
 
         self.scrollbar = ttk.Scrollbar(self.main_frame, orient="vertical", command=self.tree.yview)
-        self.scrollbar.grid(row=1, column=1, sticky="ns")
+        self.scrollbar.grid(row=2, column=1, sticky="ns")
         self.tree.configure(yscrollcommand=self.scrollbar.set)
 
-        # Search bar
-        self.search_var = tk.StringVar()
-        self.search_var.trace_add("write", self.filter_table)
-        self.entry_search = tk.Entry(self.main_frame, textvariable=self.search_var)
-        self.entry_search.grid(row=2, column=0, padx=10, pady=(0, 10), sticky="ew")
+        # Add button
+        self.button_add_account = tk.Button(self.main_frame, text="Add New Account", command=self.add_account, bg="purple", fg="white")
+        self.button_add_account.bind("<Enter>", self.on_enter_button)
+        self.button_add_account.bind("<Leave>", self.on_leave_button)
+        self.button_add_account.grid(row=3, column=0, padx=10, pady=10, sticky="ew")  # Bottom of the table
+
+
+        # Configure grid weights for proper resizing
+        self.main_frame.grid_rowconfigure(2, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
 
         # Fetch data
         self.populate_table()
 
 
-    def on_enter_button(button):
-        button.config(bg="purple", fg="white")
-    def on_leave_button(button):
-        button.config(bg="white", fg="black")
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
+
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
 
     def logout(self):
         self.parent.show_login_screen()

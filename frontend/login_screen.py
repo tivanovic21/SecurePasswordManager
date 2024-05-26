@@ -24,8 +24,8 @@ class LoginScreen(tk.Frame):
         self.entry_password = tk.Entry(self, show="*")
         self.entry_password.grid(row=1, column=1, padx=(10, 300), pady=(15,5), sticky="w")  # Right margin of 200
 
-        self.button_login = tk.Button(self, text="Login", command=self.login, bg="purple", fg="white")
-        self.button_reset_password = tk.Button(self, text="Reset Password", command=self.resetPassword, bg="purple", fg="white")
+        self.button_login = tk.Button(self, text="Login", command=self.login, bg="purple", fg="white", width=5, anchor="center")
+        self.button_reset_password = tk.Button(self, text="Reset Password", command=self.resetPassword, bg="purple", fg="white", width=15, anchor="center")
 
         self.button_login.bind("<Enter>", lambda event: self.button_login.config(bg="purple", fg="white"))
         self.button_login.bind("<Leave>", lambda event: self.button_login.config(bg="SystemButtonFace", fg="black"))
@@ -33,8 +33,8 @@ class LoginScreen(tk.Frame):
         self.button_reset_password.bind("<Enter>", lambda event: self.button_reset_password.config(bg="purple", fg="white"))
         self.button_reset_password.bind("<Leave>", lambda event: self.button_reset_password.config(bg="SystemButtonFace", fg="black"))
 
-        self.button_login.grid(row=2, column=0, padx=10, pady=15, columnspan=2, sticky="nsew")  # Center horizontally
-        self.button_reset_password.grid(row=3, column=0, padx=10, pady=10, columnspan=2, sticky="nsew")  # Center horizontally
+        self.button_login.grid(row=2, column=0, padx=400, pady=40, columnspan=2, sticky="nsew")  # Center horizontally
+        self.button_reset_password.grid(row=3, column=0, padx=400, pady=0, columnspan=2, sticky="nsew")  # Center horizontally
 
         self.label_register = tk.Label(self, text="New user? Register!", fg="cyan", cursor="hand2")
         self.label_register.bind("<Button-1>", lambda event: self.parent.show_registration_screen())
