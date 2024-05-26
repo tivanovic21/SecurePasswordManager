@@ -17,7 +17,7 @@ class LoginScreen(tk.Frame):
         self.label_title = tk.Label(self, text="Password Manager", font=("Helvetica", 20, "bold"))
         self.label_title.grid(row=0, column=0, columnspan=2, padx=(300, 300), pady=(20, 10), sticky="nsew")  # Left and right margin of 200
 
-# Master password label and entry
+        # Master password label and entry
         self.label_password = tk.Label(self, text="Master password:")
         self.label_password.grid(row=1, column=0, padx=(300, 10), pady=5, sticky="e")  # Left margin of 200
 

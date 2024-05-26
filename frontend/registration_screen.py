@@ -69,7 +69,7 @@ class RegistrationScreen(tk.Frame):
             messagebox.showerror("Error", "Passwords do not match")
             return
         else:
-            result, message = Authentication.register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False)
+            result, message = Authentication.register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False, salt='')
             if result: 
                 PasswordManager.__init__(self, Authentication.hash_password(password))
                 self.parent.show_login_screen()

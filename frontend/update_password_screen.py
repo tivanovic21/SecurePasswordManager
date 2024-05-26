@@ -1,6 +1,8 @@
+import base64
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from backend.authentication import Authentication
 from backend.database import PasswordDatabase
 from backend.password_managment import PasswordManager
 
@@ -54,13 +56,29 @@ class UpdatePasswordScreen(tk.Toplevel):
         self.entry_domain.insert(0, self.initial_data[1])
 
     def update_password(self):
+
+        user_data = Authentication.fetchUserData() # returns tuple of user data
+
+        master_pass = user_data[2]  
+        encoded_salt = user_data[-1]         
+
+        if isinstance(encoded_salt, tuple):
+            encoded_salt = encoded_salt[0]  # get first element of tuple 
+
+        # Decode the base64 encoded salt
+        salt = base64.b64decode(encoded_salt)
+
+        encryption_key = PasswordManager.derive_key(master_pass, salt)
+        password_manager = PasswordManager(encryption_key)
+        encrypted_pass = password_manager.encrypt_password(self.entry_password.get())
+
         updated_data = {
             "app_id": self.app_id,
             "pass_id": self.pass_id,
             "app_name": self.entry_app_name.get(),
             "domain": self.entry_domain.get(),
             "username": self.entry_username.get(),
-            "password": self.entry_password.get()
+            "password": encrypted_pass
         }
   
         PasswordDatabase.update_password(self, self.pass_id, updated_data)

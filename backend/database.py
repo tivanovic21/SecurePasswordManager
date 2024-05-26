@@ -61,17 +61,18 @@ class PasswordDatabase:
         return passwords
 
     def add_password(self, user_id, app_id, username, password):
-        encrypted_pass = self.encrypt_password(password)
+        # encrypted_pass = self.encrypt_password(password)
         conn, cur = Authentication.connectDB()
         cur.execute("""
             INSERT INTO Password (User_id, Application_id, username, password)
             VALUES (?, ?, ?, ?)
-        """, (user_id, app_id, username, encrypted_pass))
+        """, (user_id, app_id, username, password))
         conn.commit()
         conn.close()
 
     def update_password(self, password_id, updated_data):
-        encrypted_pass = self.encrypt_password(updated_data["password"])
+        # encrypted_pass = self.encrypt_password(updated_data["password"])
+        encrypted_pass = updated_data["password"]
         conn, cur = Authentication.connectDB()
         cur.execute(""" 
             UPDATE Application

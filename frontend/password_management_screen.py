@@ -6,6 +6,7 @@ from backend.password_managment import PasswordManager
 from frontend.add_account_screen import AddAccountScreen
 from frontend.update_password_screen import UpdatePasswordScreen
 from backend.database import PasswordDatabase
+import base64
 
 class PasswordManagementScreen(tk.Frame):
     def __init__(self, parent):
@@ -74,12 +75,19 @@ class PasswordManagementScreen(tk.Frame):
         # Fetch data
         self.populate_table()
 
+<<<<<<< HEAD
 
     def on_enter_button(self, event):
         event.widget.config(bg="white", fg="purple")
 
     def on_leave_button(self, event):
         event.widget.config(bg="purple", fg="white")
+=======
+    def on_enter_button(button):
+        button.config(bg="purple", fg="white")
+    def on_leave_button(button):
+        button.config(bg="white", fg="black")
+>>>>>>> 4d84b218b57d8f4eb8f85e55c47d420551489244
 
     def logout(self):
         self.parent.show_login_screen()
@@ -112,7 +120,6 @@ class PasswordManagementScreen(tk.Frame):
         else: 
             self.refresh_table()
 
-
     def populate_table(self):
         data = PasswordDatabase.get_user_passwords(self, 1)
         for i, (username, password, app_name, domain) in enumerate(data, start=1):
@@ -125,6 +132,7 @@ class PasswordManagementScreen(tk.Frame):
         menu = tk.Menu(self, tearoff=0)
         menu.add_command(label="Update Password", command=lambda: self.update_password(item))
         menu.add_command(label="Delete Password", command=lambda: self.delete_password(item))
+        menu.add_command(label="Copy Password", command=lambda: self.copy_password(item))
 
         menu.post(event.x_root, event.y_root)
 
@@ -146,3 +154,26 @@ class PasswordManagementScreen(tk.Frame):
             password_id = PasswordDatabase.get_pass_id(self, delete_data)
             PasswordDatabase.delete_password(self, password_id)
             self.tree.delete(item)
+
+    def copy_password(self, item):
+        values = self.tree.item(item, "values")
+        encrypted_password = values[3]
+
+        user_data = Authentication.fetchUserData()  
+        master_pass = user_data[2]  
+        encoded_salt = user_data[-1]  
+
+        if isinstance(encoded_salt, tuple):
+            encoded_salt = encoded_salt[0]  
+
+        salt = base64.b64decode(encoded_salt)
+
+        encryption_key = PasswordManager.derive_key(master_pass, salt)
+
+        password_manager = PasswordManager(encryption_key)
+
+        decrypted_password = password_manager.decrypt_password(encrypted_password)
+
+        self.clipboard_clear()
+        self.clipboard_append(decrypted_password)
+        messagebox.showinfo("Password Copied", "The password has been copied to your clipboard.")
