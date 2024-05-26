@@ -1,7 +1,10 @@
+import base64
+import os
 import bcrypt
 import sqlite3
 from backend.twoFA import TwoFactorAuth
 from datetime import datetime
+from backend.password_managment import PasswordManager
 
 class Authentication:
     @staticmethod
@@ -46,6 +49,14 @@ class Authentication:
         conn.close()
         if user:
             return user
+        
+    @staticmethod
+    def getSalt(): 
+        conn, curr = Authentication.connectDB()
+        curr.execute("SELECT salt from User where id=1")
+        salt = curr.fetchone()
+        conn.close()
+        return salt
         
     @staticmethod
     def updateFingerprint(status):
@@ -109,15 +120,17 @@ class Authentication:
 
     def login_user(password):
         try:
-            conn, cur = Authentication.connectDB()
-
-            cur.execute("SELECT * FROM User WHERE id=1")
-            data = cur.fetchone()
+            data = Authentication.fetchUserData()
 
             if data:
                 hashed_password = data[2]
                 if Authentication.verify_password(password, hashed_password):
                     user = Authentication.fetchUser(data[1])
+                    encoded_salt = data[9]
+                    salt = base64.b64decode(encoded_salt)
+                    if salt:
+                        encryption_key = PasswordManager.derive_key(password, salt)
+                        PasswordManager.set_encryption_key(PasswordManager, encryption_key)
                     return True, user[0]
                 else:
                     return False, 'Invalid password.'
@@ -128,18 +141,20 @@ class Authentication:
             print("Error accessing database:", e)
             return False, 'Error accessing database.'
 
-        finally:
-            if conn:
-                conn.close()
-
-    def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False):
+    def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False, salt=''):
         if Authentication.checkDB():
             try:
                 conn, cur = Authentication.connectDB()
                 hashed_password = Authentication.hash_password(password)
+                salt = os.urandom(16)
+                encoded_salt = base64.b64encode(salt).decode('utf-8') #convert bytes to string to fit VARCHAR
 
-                cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint) VALUES (?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint))
+                cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint, salt) VALUES (?, ?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint, encoded_salt))
                 conn.commit()
+
+                encryption_key = PasswordManager.derive_key(password, salt)
+                PasswordManager.set_encryption_key(PasswordManager, encryption_key)
+
                 return True, f'Registered successfully as {username}'
 
             except sqlite3.Error as e:

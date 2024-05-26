@@ -15,6 +15,7 @@ CREATE TABLE "User"(
     "fingerprint" BOOLEAN,
     "token" VARCHAR(100),
     "token_expiration" DATETIME,
+    "salt" VARCHAR(100),
     CONSTRAINT "id_UNIQUE" UNIQUE("id"),
     CONSTRAINT "username_UNIQUE" UNIQUE("email")
 );

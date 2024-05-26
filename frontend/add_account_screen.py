@@ -1,9 +1,11 @@
+import base64
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
 from tkinter import simpledialog
 from backend.password_managment import PasswordManager
 from backend.database import PasswordDatabase
+from backend.authentication import Authentication
 
 class AddAccountScreen(tk.Toplevel):
     def __init__(self, parent):
@@ -56,15 +58,32 @@ class AddAccountScreen(tk.Toplevel):
             messagebox.showerror("Error", "App Name, Username, and Password fields are required")
             return
 
-        user_id = 1
+        user_data = Authentication.fetchUserData() # returns tuple of user data
+        user_id = user_data[0]
         app_id = PasswordDatabase.check_app_exists(self, app_name, domain, user_id)
 
         if app_id is None:
             app_id = PasswordDatabase.add_app(self, app_name, domain, user_id)
 
-        # save to db
-        encrypted_pass = PasswordManager.encrypt_password(self, password)
-        PasswordDatabase.add_password(self, user_id, app_id, username, password)
+        master_pass = user_data[2]  
+        encoded_salt = user_data[-1]  
+
+        if isinstance(encoded_salt, tuple):
+            encoded_salt = encoded_salt[0]  # get first element of tuple
+
+        # Decode the base64 encoded salt
+        salt = base64.b64decode(encoded_salt)
+
+        print("pass: ", master_pass, "salt: ", salt)
+        print("master_pass type:", type(master_pass))
+        print("salt type:", type(salt))
+
+        encryption_key = PasswordManager.derive_key(master_pass, salt)
+        password_manager = PasswordManager(encryption_key)
+        encrypted_pass = password_manager.encrypt_password(password)
+
+        PasswordDatabase.add_password(self, user_id, app_id, username, encrypted_pass)
+
         messagebox.showinfo("Success", "Password added successfully")
         self.destroy()
 
