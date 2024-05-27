@@ -25,10 +25,10 @@ class RegistrationScreen(tk.Frame):
         self.button_generate_password = tk.Button(self, text="Generate Password", command=self.generate_password, bg="purple", fg="white")
 
         self.button_register.bind("<Enter>", lambda event: self.button_register.config(bg="purple", fg="white"))
-        self.button_register.bind("<Leave>", lambda event: self.button_register.config(bg="SystemButtonFace", fg="black"))
+        self.button_register.bind("<Leave>", lambda event: self.button_register.config(bg="white", fg="black"))
 
         self.button_generate_password.bind("<Enter>", lambda event: self.button_generate_password.config(bg="purple", fg="white"))
-        self.button_generate_password.bind("<Leave>", lambda event: self.button_generate_password.config(bg="SystemButtonFace", fg="black"))
+        self.button_generate_password.bind("<Leave>", lambda event: self.button_generate_password.config(bg="white", fg="black"))
 
         self.button_register.grid(row=5, columnspan=2, padx=10, pady=10, sticky="nsew")  # Center horizontally
         self.button_generate_password.grid(row=4, columnspan=2, padx=10, pady=5, sticky="nsew")  # Center horizontally

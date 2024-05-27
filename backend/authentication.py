@@ -26,8 +26,9 @@ class Authentication:
     @staticmethod
     def fetchUser(email):
         conn, cur = Authentication.connectDB()
-        cur.execute("SELECT username from User where email=?", (email,))
-        user: object = cur.fetchone()
+        cur.execute("SELECT username FROM User WHERE email=?", (email,))
+        user = cur.fetchone()
+        conn.close()
         return user
 
     @staticmethod
@@ -36,36 +37,30 @@ class Authentication:
         cur.execute("SELECT * FROM User")
         user = cur.fetchall()
         conn.close()
-        if len(user) == 0:
-            return True
-        else:
-            return False
+        return len(user) == 0
     
     @staticmethod
     def fetchUserData():
         conn, cur = Authentication.connectDB()
-        cur.execute("SELECT * from User")
+        cur.execute("SELECT * FROM User")
         user = cur.fetchone()
         conn.close()
-        if user:
-            return user
-        
+        return user
+    
     @staticmethod
     def getSalt(): 
-        conn, curr = Authentication.connectDB()
-        curr.execute("SELECT salt from User where id=1")
-        salt = curr.fetchone()
+        conn, cur = Authentication.connectDB()
+        cur.execute("SELECT salt FROM User WHERE id=1")
+        salt = cur.fetchone()
         conn.close()
         return salt
-        
+    
     @staticmethod
     def updateFingerprint(status):
         conn, cur = Authentication.connectDB()
         id = Authentication.fetchUserData()[0]
-        if status == 1:
-            cur.execute("UPDATE User SET fingerprint = 0 WHERE id=?", (id,))
-        else:
-            cur.execute("UPDATE User SET fingerprint = 1 WHERE id=?", (id,))
+        new_status = 0 if status == 1 else 1
+        cur.execute("UPDATE User SET fingerprint=? WHERE id=?", (new_status, id))
         conn.commit()
         conn.close()
     
@@ -76,16 +71,14 @@ class Authentication:
         firstTime = False
 
         if status == 1:
-            cur.execute("UPDATE User SET twoFA = 0 WHERE id=?", (id,)) #turn off 2fa
+            cur.execute("UPDATE User SET twoFA=0 WHERE id=?", (id,)) # Turn off 2FA
         else:
-            cur.execute("UPDATE User SET twoFA = 1 WHERE id=?", (id,)) #turn on 2fa
+            cur.execute("UPDATE User SET twoFA=1 WHERE id=?", (id,)) # Turn on 2FA
             twoFA_secret = Authentication.fetchUserData()[5]
             if twoFA_secret is None:
                 firstTime = True
                 twoFA_secret = TwoFactorAuth.generateSecret()
                 cur.execute("UPDATE User SET twoFA_secret=? WHERE id=?", (twoFA_secret, id))
-            else: 
-                firstTime = False
         
         conn.commit()
         conn.close()
@@ -107,8 +100,7 @@ class Authentication:
 
         if token == userToken and datetime.now() <= datetime.strptime(userExpiration, '%Y-%m-%d %H:%M:%S.%f'):
             return True
-        else:
-            return False
+        return False
         
     @staticmethod
     def saveNewPassword(email, password):
@@ -118,42 +110,61 @@ class Authentication:
         conn.commit()
         conn.close()
 
+    @staticmethod
     def login_user(password):
         try:
             data = Authentication.fetchUserData()
 
+            # Debugging: print the data
+            print(f"Retrieved data: {data}")
+
             if data:
+                # Ensure that the data has at least 10 elements
+                if len(data) < 10:
+                    print("Error: Retrieved data does not have enough elements")
+                    return False, 'Invalid user data.'
+
                 hashed_password = data[2]
                 if Authentication.verify_password(password, hashed_password):
                     user = Authentication.fetchUser(data[1])
-                    encoded_salt = data[9]
-                    salt = base64.b64decode(encoded_salt)
-                    if salt:
-                        encryption_key = PasswordManager.derive_key(password, salt)
-                        PasswordManager.set_encryption_key(PasswordManager, encryption_key)
-                    return True, user[0]
+                    encoded_salt = data[9]  # Use index 9 for the salt
+
+                    # Decode the salt and verify
+                    try:
+                        salt = base64.b64decode(encoded_salt)
+                        if salt:
+                            encryption_key = PasswordManager.derive_key(password, salt)
+                            pm = PasswordManager()
+                            pm.set_encryption_key(encryption_key)
+                        return True, user[0]
+                    except Exception as e:
+                        print("Error decoding salt:", e)
+                        return False, 'Error decoding salt.'
                 else:
                     return False, 'Invalid password.'
             else:
-                return False, 'Invalid password.'
+                return False, 'Invalid user data.'
 
         except sqlite3.Error as e:
             print("Error accessing database:", e)
             return False, 'Error accessing database.'
 
+    @staticmethod
     def register_user(email, password, username, twoFA=False, twoFA_secret=None, fingerprint=False, salt=''):
         if Authentication.checkDB():
             try:
                 conn, cur = Authentication.connectDB()
                 hashed_password = Authentication.hash_password(password)
                 salt = os.urandom(16)
-                encoded_salt = base64.b64encode(salt).decode('utf-8') #convert bytes to string to fit VARCHAR
+                encoded_salt = base64.b64encode(salt).decode('utf-8')  # Convert bytes to string to fit VARCHAR
 
-                cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint, salt) VALUES (?, ?, ?, ?, ?, ?, ?)", (email, hashed_password, username, twoFA, twoFA_secret, fingerprint, encoded_salt))
+                cur.execute("INSERT INTO User (email, master_password, username, twoFA, twoFA_secret, fingerprint, salt) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                            (email, hashed_password, username, twoFA, twoFA_secret, fingerprint, encoded_salt))
                 conn.commit()
 
                 encryption_key = PasswordManager.derive_key(password, salt)
-                PasswordManager.set_encryption_key(PasswordManager, encryption_key)
+                pm = PasswordManager()
+                pm.set_encryption_key(encryption_key)
 
                 return True, f'Registered successfully as {username}'
 
@@ -166,3 +177,7 @@ class Authentication:
                     conn.close()
         else:
             return False, 'Only one user can be registered.'
+
+# Testing the login functionality
+result, message = Authentication.login_user("correct_password")
+print(result, message)
