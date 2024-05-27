@@ -77,7 +77,7 @@ class AddAccountScreen(tk.Toplevel):
         has_uppercase = any(char.isupper() for char in password)
         has_lowercase = any(char.islower() for char in password)
         has_digit = any(char.isdigit() for char in password)
-        has_special = re.match(r'[!@#$%^&*(),.?":{}|<>]', password)
+        has_special = any(re.search(r'[!@#$%^&*(),.?":{}|<>]', char) for char in password)
 
         if not has_uppercase or not has_lowercase or not has_digit or not has_special:
             return False
