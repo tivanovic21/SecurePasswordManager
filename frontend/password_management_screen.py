@@ -75,19 +75,10 @@ class PasswordManagementScreen(tk.Frame):
         # Fetch data
         self.populate_table()
 
-<<<<<<< HEAD
-
-    def on_enter_button(self, event):
-        event.widget.config(bg="white", fg="purple")
-
-    def on_leave_button(self, event):
-        event.widget.config(bg="purple", fg="white")
-=======
     def on_enter_button(button):
         button.config(bg="purple", fg="white")
     def on_leave_button(button):
         button.config(bg="white", fg="black")
->>>>>>> 4d84b218b57d8f4eb8f85e55c47d420551489244
 
     def logout(self):
         self.parent.show_login_screen()
