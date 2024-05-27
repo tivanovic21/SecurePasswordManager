@@ -1,4 +1,5 @@
 import base64
+import re
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
@@ -19,11 +20,13 @@ class AddAccountScreen(tk.Toplevel):
         self.label_username = tk.Label(self, text="Username:")
         self.label_password = tk.Label(self, text="Password:")
         self.label_domain = tk.Label(self, text="Domain:")
+        self.label_how_strong_is_password = tk.Label(self, text="Strength")
 
         self.entry_app_name = tk.Entry(self)
         self.entry_username = tk.Entry(self)
         self.entry_password = tk.Entry(self, show="*")
         self.entry_domain = tk.Entry(self)
+        self.entry_strength = tk.Entry(self)
 
         self.button_add_password = tk.Button(self, text="Add Password", command=self.add_password, bg="purple", fg="white", width=25)
         self.button_add_password.bind("<Enter>", self.on_enter_button)
@@ -47,17 +50,45 @@ class AddAccountScreen(tk.Toplevel):
         self.label_domain.grid(row=3, column=0, padx=10, pady=5, sticky="e")
         self.entry_domain.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-        self.button_add_password.grid(row=4, column=0, columnspan=2, padx=100, pady=10)
-        self.button_generate_password.grid(row=5, column=0, columnspan=2, padx=10, pady=5)
+        self.label_how_strong_is_password.grid(row=4, column=0, padx=10, pady=5, sticky="e")
+        self.entry_strength.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
-        self.checkbox_show_password.grid(row=6, column=0, columnspan=2, padx=10, pady=5)
+        self.button_add_password.grid(row=5, column=0, columnspan=2, padx=100, pady=10)
+        self.button_generate_password.grid(row=6, column=0, columnspan=2, padx=10, pady=5)
+
+        self.checkbox_show_password.grid(row=8, column=0, columnspan=2, padx=10, pady=5)
+        
+        self.button_check_password = tk.Button(self, text="Check Password", command=self.check_password_strength_main, bg="purple", fg="white", width=25)
+        self.button_check_password.bind("<Enter>", self.on_enter_button)
+        self.button_check_password.bind("<Leave>", self.on_leave_button)
+        self.button_check_password.grid(row=7, column=0, columnspan=2, padx=10, pady=5)
+
+    
+    def check_password_strength_main(self):
+        password = self.entry_password.get()
+        if self.check_password_strength(password):
+            self.entry_strength.config(bg="green", text="Strong", fg="black")
+        else:
+            self.entry_strength.config(bg="red", text="Weak", fg="white")
+
+
+    @staticmethod
+    def check_password_strength(password):
+        has_uppercase = any(char.isupper() for char in password)
+        has_lowercase = any(char.islower() for char in password)
+        has_digit = any(char.isdigit() for char in password)
+        has_special = re.match(r'[!@#$%^&*(),.?":{}|<>]', password)
+
+        if not has_uppercase or not has_lowercase or not has_digit or not has_special:
+            return False
+        else:
+            return True
 
     def on_enter_button(self, event):
         event.widget.config(bg="white", fg="purple")
 
     def on_leave_button(self, event):
         event.widget.config(bg="purple", fg="white")
-
 
     def add_password(self):
         app_name = self.entry_app_name.get()
