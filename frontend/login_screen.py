@@ -27,11 +27,11 @@ class LoginScreen(tk.Frame):
         self.button_login = tk.Button(self, text="Login", command=self.login, bg="purple", fg="white", width=5, anchor="center")
         self.button_reset_password = tk.Button(self, text="Reset Password", command=self.resetPassword, bg="purple", fg="white", width=15, anchor="center")
 
-        self.button_login.bind("<Enter>", lambda event: self.button_login.config(bg="purple", fg="white"))
-        self.button_login.bind("<Leave>", lambda event: self.button_login.config(bg="white", fg="black"))
+        self.button_login.bind("<Enter>", self.on_enter_button)
+        self.button_login.bind("<Leave>", self.on_leave_button)
 
-        self.button_reset_password.bind("<Enter>", lambda event: self.button_reset_password.config(bg="purple", fg="white"))
-        self.button_reset_password.bind("<Leave>", lambda event: self.button_reset_password.config(bg="white", fg="black"))
+        self.button_reset_password.bind("<Enter>", self.on_enter_button)
+        self.button_reset_password.bind("<Leave>", self.on_leave_button)
 
         self.button_login.grid(row=2, column=0, padx=400, pady=40, columnspan=2, sticky="nsew")  # Center horizontally
         self.button_reset_password.grid(row=3, column=0, padx=400, pady=0, columnspan=2, sticky="nsew")  # Center horizontally
@@ -46,6 +46,11 @@ class LoginScreen(tk.Frame):
         self.label_register.grid(row=4, column=0, columnspan=2, padx=(200, 200), pady=(40, 5), sticky="nsew")  # Top margin of 50
 
    
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
+
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
 
     def resetPassword(self):
         email = simpledialog.askstring('Reset Password', 'Please enter your email address:')

@@ -16,18 +16,25 @@ class PasswordManagementScreen(tk.Frame):
 
         # Sidebar
         self.sidebar_frame = tk.Frame(self, bg="black")
-        self.sidebar_frame.grid(row=0, column=0, sticky="ns")
-        
-        self.label_user_profile = tk.Label(self.sidebar_frame, text="User Profile", fg="white", cursor="hand2", bg="purple", highlightthickness=1, highlightbackground="black")
+        self.sidebar_frame.grid(row=0, column=0, sticky="ns")  # Stretch vertically
+
+        self.label_user_profile = tk.Label(self.sidebar_frame, text="User Profile", fg="white", cursor="hand2", bg="purple", highlightthickness=1, highlightbackground="black", width=10)
         self.label_user_profile.bind("<Button-1>", lambda event: self.parent.show_user_profile_screen())
         self.label_user_profile.bind("<Enter>", self.on_enter_button)
         self.label_user_profile.bind("<Leave>", self.on_leave_button)
         self.label_user_profile.grid(row=0, pady=(20, 10))
 
+        self.label_password_management = tk.Label(self.sidebar_frame, text="Passwords", fg="white", cursor="hand2", bg="purple", highlightthickness=1, highlightbackground="black", width=10)
+        self.label_password_management.bind("<Button-1>", lambda event: self.parent.show_password_management_screen())
+        self.label_password_management.bind("<Enter>", self.on_enter_button)
+        self.label_password_management.bind("<Leave>", self.on_leave_button)
+        self.label_password_management.grid(row=1, pady=0)
+
         self.button_logout = tk.Button(self.sidebar_frame, text="Logout", command=self.logout, bg="purple", fg="white")
         self.button_logout.bind("<Enter>", self.on_enter_button)
         self.button_logout.bind("<Leave>", self.on_leave_button)
-        self.button_logout.grid(row=1, pady=(255, 0))  # Adjust top margin as needed
+        self.button_logout.grid(row=2, pady=(230, 0))  # Adjust top margin as needed
+
       
         # Main content
         self.main_frame = tk.Frame(self)
@@ -82,11 +89,6 @@ class PasswordManagementScreen(tk.Frame):
     def on_leave_button(self, event):
         event.widget.config(bg="purple", fg="white")
 
-    def on_enter_button(button):
-        button.config(bg="purple", fg="white")
-    def on_leave_button(button):
-        button.config(bg="white", fg="black")
-
 
     def logout(self):
         self.parent.show_login_screen()
@@ -123,7 +125,7 @@ class PasswordManagementScreen(tk.Frame):
         data = PasswordDatabase.get_user_passwords(self, 1)
         for i, (username, password, app_name, domain) in enumerate(data, start=1):
             item = self.tree.insert("", "end", text=str(i), values=(app_name, domain, username, password))
-            self.tree.bind("<Button-2>", self.show_context_menu)
+            self.tree.bind("<Button-3>", self.show_context_menu)
 
     def show_context_menu(self, event):
         item = self.tree.identify_row(event.y)

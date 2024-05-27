@@ -45,6 +45,16 @@ class PasswordManagerApp(tk.Tk):
             self.password_management_screen = PasswordManagementScreen(self)
         self.password_management_screen.grid()
 
+    def show_password_management_screen1(self):
+        self.user_profile_screen.grid_forget()
+        if self.registration_screen:
+            self.registration_screen.grid_forget()
+        if self.user_profile_screen:
+            self.user_profile_screen.grid_forget()
+        if not self.password_management_screen:
+            self.password_management_screen = PasswordManagementScreen(self)
+        self.password_management_screen.grid()
+
     def show_user_profile_screen(self):
         self.login_screen.grid_forget()
         if self.registration_screen:
@@ -54,6 +64,7 @@ class PasswordManagerApp(tk.Tk):
         if not self.user_profile_screen:
             self.user_profile_screen = UserProfileScreen(self)
         self.user_profile_screen.grid()
+
 
 
     def set_user_data(self, user_data):

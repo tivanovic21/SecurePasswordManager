@@ -21,14 +21,15 @@ class RegistrationScreen(tk.Frame):
         self.entry_confirm_password = tk.Entry(self, show="*")
         self.entry_username = tk.Entry(self)
 
+
         self.button_register = tk.Button(self, text="Register", command=self.register, bg="purple", fg="white")
         self.button_generate_password = tk.Button(self, text="Generate Password", command=self.generate_password, bg="purple", fg="white")
 
-        self.button_register.bind("<Enter>", lambda event: self.button_register.config(bg="purple", fg="white"))
-        self.button_register.bind("<Leave>", lambda event: self.button_register.config(bg="white", fg="black"))
+        self.button_register.bind("<Enter>", self.on_enter_button)
+        self.button_register.bind("<Leave>", self.on_leave_button)
 
-        self.button_generate_password.bind("<Enter>", lambda event: self.button_generate_password.config(bg="purple", fg="white"))
-        self.button_generate_password.bind("<Leave>", lambda event: self.button_generate_password.config(bg="white", fg="black"))
+        self.button_generate_password.bind("<Enter>", self.on_enter_button)
+        self.button_generate_password.bind("<Leave>", self.on_leave_button)
 
         self.button_register.grid(row=5, columnspan=2, padx=10, pady=10, sticky="nsew")  # Center horizontally
         self.button_generate_password.grid(row=4, columnspan=2, padx=10, pady=5, sticky="nsew")  # Center horizontally
@@ -51,10 +52,16 @@ class RegistrationScreen(tk.Frame):
         self.label_username.grid(row=3, column=0, padx=10, pady=5, sticky="e")
         self.entry_username.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-        self.button_register.grid(row=5, columnspan=2, padx=10, pady=10)
-        self.button_generate_password.grid(row=4, columnspan=2, padx=10, pady=5)
+        self.button_register.grid(row=5, columnspan=2, padx=10, pady=10, sticky="nsew")
+        self.button_generate_password.grid(row=4, columnspan=2, padx=10, pady=5, sticky="nsew")
         self.show_password_checkbox.grid(row=1, column=2, padx=5, pady=5)
-        self.label_login.grid(row=6, columnspan=2, padx=10, pady=5)
+        self.label_login.grid(row=6, columnspan=2, padx=10, pady=5, sticky="nsew")
+
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
+
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
 
     def register(self):
         email = self.entry_email.get()

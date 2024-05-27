@@ -48,7 +48,12 @@ class UpdatePasswordScreen(tk.Toplevel):
         self.button_update_password.grid(row=4, column=0, columnspan=2, padx=10, pady=10)
 
         self.populate_fields()
+        
+    def on_enter_button(self, event):
+        event.widget.config(bg="white", fg="purple")
 
+    def on_leave_button(self, event):
+        event.widget.config(bg="purple", fg="white")
     def populate_fields(self):
         self.entry_app_name.insert(0, self.initial_data[0])
         self.entry_username.insert(0, self.initial_data[2])
