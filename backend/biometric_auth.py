@@ -1,4 +1,4 @@
-#import touchid
+import touchid
 import platform
 
 class BiometricAuth:
@@ -11,13 +11,13 @@ class BiometricAuth:
         else:
             return 'linux'
         
-   # @staticmethod
-   # def touchID():
-    #    success = touchid.authenticate()
-    #    if success:
-    #        return True
-    #    else:
-     #       return False
+    @staticmethod
+    def touchID():
+        success = touchid.authenticate()
+        if success:
+            return True
+        else:
+            return False
     
     @staticmethod
     def wbf():

@@ -116,7 +116,7 @@ class Authentication:
             data = Authentication.fetchUserData()
 
             # Debugging: print the data
-            print(f"Retrieved data: {data}")
+            # print(f"Retrieved data: {data}")
 
             if data:
                 # Ensure that the data has at least 10 elements
@@ -179,5 +179,5 @@ class Authentication:
             return False, 'Only one user can be registered.'
 
 # Testing the login functionality
-result, message = Authentication.login_user("correct_password")
-print(result, message)
+#result, message = Authentication.login_user("correct_password")
+#print(result, message)

@@ -90,35 +90,36 @@ class LoginScreen(tk.Frame):
                         self.label_fingerprint = None
 
 
-    #def biometricLogin(self, platform):
-      #  match platform:
-      #      case 'macOS':
-      #          if BiometricAuth.touchID():
-       #             # If 2FA is on 
-         #           if self.check2FA():
-       #                 if self.promptForTOTP():
-       #                     userData = Authentication.fetchUserData()
-      #                      self.parent.set_user_data(userData[3])
-      #                      self.parent.show_password_management_screen()
-       #             else:
-        #                userData = Authentication.fetchUserData()
-         #               self.parent.set_user_data(userData[3])
-          #              self.parent.show_password_management_screen()
-           ##        messagebox.showerror("Login Failed", "TouchID authentication failed.")
-            #case 'windows':
-             #   if BiometricAuth.wbf():
-              #      # If 2FA is on 
-               #     if self.check2FA():
-                  #    if self.promptForTOTP():
-                 #           userData = Authentication.fetchUserData()
-                  #          self.parent.set_user_data(userData[3])
-                   #         self.parent.show_password_management_screen()
-                #    else:
-               #         userData = Authentication.fetchUserData()
-              #          self.parent.set_user_data(userData[3])
-              #          self.parent.show_password_management_screen()
-              #  else:
-              #      messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
+    def biometricLogin(self, platform):
+        match platform:
+            case 'macOS':
+                if BiometricAuth.touchID():
+                    # If 2FA is on 
+                    if self.check2FA():
+                        if self.promptForTOTP():
+                            userData = Authentication.fetchUserData()
+                            self.parent.set_user_data(userData[3])
+                            self.parent.show_password_management_screen()
+                    else:
+                        userData = Authentication.fetchUserData()
+                        self.parent.set_user_data(userData[3])
+                        self.parent.show_password_management_screen()
+                else:    
+                    messagebox.showerror("Login Failed", "TouchID authentication failed.")
+            case 'windows':
+                if BiometricAuth.wbf():
+                    # If 2FA is on 
+                    if self.check2FA():
+                      if self.promptForTOTP():
+                            userData = Authentication.fetchUserData()
+                            self.parent.set_user_data(userData[3])
+                            self.parent.show_password_management_screen()
+                      else:
+                        userData = Authentication.fetchUserData()
+                        self.parent.set_user_data(userData[3])
+                        self.parent.show_password_management_screen()
+                else:
+                    messagebox.showerror("Login Failed", "Windows fingerprint authentication failed.")
 
     def login(self):
         password = self.entry_password.get()
