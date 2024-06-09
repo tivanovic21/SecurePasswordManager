@@ -19,7 +19,7 @@ class PasswordManager:
         return cipher_suite.decrypt(encrypted_password.encode()).decode()
     
     def generate_strong_password(self, length):
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+        password = ''.join(random.choices(string.ascii_letters + string.digits + "!", k=length))
         pass_list = list(password)
         random.shuffle(pass_list)
         return ''.join(pass_list)
